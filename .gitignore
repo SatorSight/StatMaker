@@ -13,4 +13,7 @@
 !/log/.keep
 !/tmp/.keep
 
+.idea
+.idea/*
+
 .byebug_history

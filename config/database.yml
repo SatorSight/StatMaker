@@ -14,12 +14,19 @@ default: &default
   encoding: utf8
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
   username: root
-  password:
+  password: 123
   socket: /var/run/mysqld/mysqld.sock
 
 development:
   <<: *default
-  database: StatMaker_development
+  adapter: mysql2
+  encoding: utf8
+  pool: 5
+  host: 185.22.63.2
+  username: root
+  password: sNae61
+  port: 3306
+  database: kioskdev
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
