@@ -18,7 +18,7 @@ class AverageLifeTime
       intervals.push interval
     end
 
-    if size == 0
+    if intervals.size != 0
       average = intervals.sum / intervals.size.to_f
     else
       average = 0
