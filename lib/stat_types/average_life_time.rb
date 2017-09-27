@@ -18,7 +18,11 @@ class AverageLifeTime
       intervals.push interval
     end
 
-    average = intervals.instance_eval { reduce(:+) / size.to_f }
+    if size == 0
+      average = intervals.sum / intervals.size.to_f
+    else
+      average = 0
+    end
 
     save_results average
 
