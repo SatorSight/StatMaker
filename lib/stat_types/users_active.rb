@@ -17,13 +17,16 @@ class UsersActive
     api.set_service_tech tech
 
     users.each do |user|
-      if api.user_subscribed? user
-        active_counter += 1
-      else
-        user_sub = user.user_subscriptions.where(sub_id: @subscription.id).first
-        user_sub.end_date = Time.now
+      user_sub = user.user_subscriptions.where(sub_id: @subscription.id).first
 
-        user_sub.save
+      if user_sub.end_date.present?
+        if api.user_subscribed? user
+          active_counter += 1
+        else
+          user_sub.end_date = Time.now
+
+          user_sub.save
+        end
       end
     end
 
