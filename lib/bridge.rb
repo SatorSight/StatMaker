@@ -26,34 +26,51 @@ module Bridge
       @access_token = access_token
     end
 
+
+    def prepare_request
+
+      bridge_url = URI.parse(Enum::SUBSCRIPTION_INFO_URL)
+
+      @http = Net::HTTP.new(bridge_url.host, bridge_url.port)
+      @http.use_ssl = true
+      @http.read_timeout = 600
+
+      @request = Net::HTTP::Post.new(bridge_url.path, {
+          'Content-Type' => Enum::CONTENT_JSON_TYPE,
+          'Authorization' => 'Bearer '+@access_token
+      })
+
+    end
+
     def set_service_tech(tech)
       @service_id = tech;
     end
 
     # @param [User] user
     def user_subscribed?(user)
-      bridge_url = URI.parse(Enum::SUBSCRIPTION_INFO_URL)
+      # bridge_url = URI.parse(Enum::SUBSCRIPTION_INFO_URL)
+      #
+      # http = Net::HTTP.new(bridge_url.host, bridge_url.port)
+      # http.use_ssl = true
+      # http.read_timeout = 600
 
-      http = Net::HTTP.new(bridge_url.host, bridge_url.port)
-      http.use_ssl = true
-      http.read_timeout = 600
       auth_fields = {}
       auth_fields[:serviceId] = @service_id
       auth_fields[:country] = Enum::COUNTRY
       auth_fields[:userId] = user.msisdn
       auth_fields[:operator] = user.operator.tech
 
-      request = Net::HTTP::Post.new(bridge_url.path, {
-          'Content-Type' => Enum::CONTENT_JSON_TYPE,
-          'Authorization' => 'Bearer '+@access_token
-      })
+      # request = Net::HTTP::Post.new(bridge_url.path, {
+      #     'Content-Type' => Enum::CONTENT_JSON_TYPE,
+      #     'Authorization' => 'Bearer '+@access_token
+      # })
 
-      request.body = auth_fields.to_json
+      @request.body = auth_fields.to_json
 
 
       tries = 5
       tries.times do |attempt|
-        res = run_request http, request
+        res = run_request @http, @request
 
         if res.in? [true, false]
           return res
@@ -66,7 +83,6 @@ module Bridge
   private
 
     def run_request(http, request)
-
       begin
         response = http.request request
         res = JSON.parse response.body
@@ -76,7 +92,6 @@ module Bridge
         :error
       end
     end
-
 
   end
 end
