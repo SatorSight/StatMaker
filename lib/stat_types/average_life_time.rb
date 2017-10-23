@@ -1,5 +1,5 @@
 class AverageLifeTime
-  DESCRIPTION = :'Measure average user subscription lifetime'
+  DESCRIPTION = :'Measure average user subscription lifetime for last 24 hours'
 
   include StatInterface
 
@@ -10,6 +10,7 @@ class AverageLifeTime
     user_subscriptions = UserSubscription
                                    .where(sub_id: @subscription.id)
                                    .where('end_date is not null')
+                                   .where('start_date >= ?', 1.day.ago)
 
     intervals = []
 
