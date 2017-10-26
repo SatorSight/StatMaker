@@ -1,11 +1,22 @@
-desc 'Commence gathering data for all active reports for all services'
-task :run_all => :environment do
+desc 'Commence gathering data for all active reports or selected for all services or selected'
+task :run, [:service_id, :stat_id] => :environment do |t, args|
   Rails.logger.level = Logger::DEBUG
-  services = Service.all
+  services = []
+
+  if args[:service_id].nil?
+    services = Service.all
+  else
+    services.push Service.find args[:service_id]
+  end
+
   services.each do |service|
     puts 'Running ' + service.title + ' stat tasks'
 
-    stat_types = service.stat_types.where active: 1
+    if args[:stat_id].nil?
+      stat_types = service.stat_types.where active: 1
+    else
+      stat_types = service.stat_types.where id: args[:stat_id].to_i
+    end
 
     stat_types.each do |stat_type|
       puts 'Collecting ' + stat_type.stat_class + ' data'

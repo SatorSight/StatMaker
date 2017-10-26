@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170926121857) do
+ActiveRecord::Schema.define(version: 20171026091447) do
 
   create_table "article", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.integer "journal_id"
@@ -176,6 +176,10 @@ ActiveRecord::Schema.define(version: 20170926121857) do
     t.string "title", null: false
     t.integer "journal", null: false
     t.integer "type", limit: 2, null: false
+    t.string "bundle_name"
+    t.string "category_name"
+    t.integer "number"
+    t.integer "page"
     t.index ["content"], name: "fulltext_content", type: :fulltext
     t.index ["title", "content"], name: "fulltext_title_content", type: :fulltext
     t.index ["title"], name: "fulltext_title", type: :fulltext
@@ -195,6 +199,23 @@ ActiveRecord::Schema.define(version: 20170926121857) do
     t.index ["stat_type_id"], name: "index_services_stat_types_on_stat_type_id"
   end
 
+  create_table "setting_type", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "name", null: false
+    t.string "tech", null: false
+  end
+
+  create_table "setting_value", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "value", null: false
+    t.integer "type_id"
+    t.index ["type_id"], name: "IDX_54DFAB55C54C8C93"
+  end
+
+  create_table "settings", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "label", null: false
+    t.string "code", null: false
+    t.string "value", null: false
+  end
+
   create_table "stat_results", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
     t.float "value", limit: 24
     t.datetime "created_at", null: false
@@ -205,12 +226,22 @@ ActiveRecord::Schema.define(version: 20170926121857) do
     t.index ["stat_type_id"], name: "index_stat_results_on_stat_type_id"
   end
 
+  create_table "stat_source_types", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
+    t.string "title"
+    t.boolean "active"
+    t.string "code"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "stat_types", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
     t.string "name"
     t.integer "order"
     t.string "title"
     t.string "stat_class"
     t.integer "active", default: 1
+    t.bigint "stat_source_type_id"
+    t.index ["stat_source_type_id"], name: "index_stat_types_on_stat_source_type_id"
   end
 
   create_table "subscription", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -253,6 +284,15 @@ ActiveRecord::Schema.define(version: 20170926121857) do
     t.index ["user_id"], name: "IDX_E2D60DAEA76ED395"
   end
 
+  create_table "user_settings", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.integer "user_id"
+    t.integer "type_id"
+    t.integer "value_id"
+    t.index ["type_id"], name: "IDX_5C844C5C54C8C93"
+    t.index ["user_id"], name: "IDX_5C844C5A76ED395"
+    t.index ["value_id"], name: "IDX_5C844C5F920BBA2"
+  end
+
   create_table "user_subscription", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.integer "user_id"
     t.integer "sub_id"
@@ -280,6 +320,7 @@ ActiveRecord::Schema.define(version: 20170926121857) do
   add_foreign_key "page_seen", "user", name: "FK_239616C2A76ED395"
   add_foreign_key "saved_journal", "journal", name: "FK_4BA628DA478E8802"
   add_foreign_key "saved_journal", "user", name: "FK_4BA628DAA76ED395"
+  add_foreign_key "setting_value", "setting_type", column: "type_id", name: "FK_54DFAB55C54C8C93"
   add_foreign_key "subscription_category", "category", name: "FK_61E246ED12469DE2", on_delete: :cascade
   add_foreign_key "subscription_category", "subscription", name: "FK_61E246ED9A1887DC", on_delete: :cascade
   add_foreign_key "tag", "j_tag", column: "tag_id", name: "FK_389B783BAD26311", on_delete: :cascade
@@ -287,6 +328,9 @@ ActiveRecord::Schema.define(version: 20170926121857) do
   add_foreign_key "user", "operator", name: "FK_8D93D649584598A3"
   add_foreign_key "user_read", "journal", name: "FK_E2D60DAE478E8802"
   add_foreign_key "user_read", "user", name: "FK_E2D60DAEA76ED395"
+  add_foreign_key "user_settings", "setting_type", column: "type_id", name: "FK_5C844C5C54C8C93"
+  add_foreign_key "user_settings", "setting_value", column: "value_id", name: "FK_5C844C5F920BBA2"
+  add_foreign_key "user_settings", "user", name: "FK_5C844C5A76ED395"
   add_foreign_key "user_subscription", "subscription", column: "sub_id", name: "FK_230A18D156992D9"
   add_foreign_key "user_subscription", "user", name: "FK_230A18D1A76ED395"
 end
