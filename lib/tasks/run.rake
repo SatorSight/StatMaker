@@ -15,7 +15,10 @@ task :run, [:service_id, :stat_id] => :environment do |t, args|
     if args[:stat_id].nil?
       stat_types = service.stat_types.where active: 1
     else
-      stat_types = service.stat_types.where id: args[:stat_id].to_i
+      stat_types = service.stat_types.where(id: args[:stat_id].to_i).take
+      unless stat_types.is_a? Array
+        stat_types = [stat_types]
+      end
     end
 
     stat_types.each do |stat_type|
